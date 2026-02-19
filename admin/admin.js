@@ -95,6 +95,7 @@ function initDashboard() {
   loadSchedule();
   loadNews();
   loadCompetitions();
+  loadSponsors();
   loadFlyers();
 }
 
@@ -572,9 +573,121 @@ function fmtDateShort(dateStr) {
 }
 
 /* ============================================================
+   SPONSORS
+   ============================================================ */
+const sponsorList  = document.getElementById('sponsorList');
+const sponsorModal = document.getElementById('sponsorModal');
+const sponsorForm  = document.getElementById('sponsorForm');
+
+const sponsorLogoInput   = document.getElementById('sponsorLogoUrl');
+const sponsorLogoPreview = document.getElementById('sponsorLogoPreview');
+sponsorLogoInput.addEventListener('input', () => {
+  const url = sponsorLogoInput.value.trim();
+  sponsorLogoPreview.src          = url;
+  sponsorLogoPreview.style.display = url ? 'block' : 'none';
+});
+
+async function loadSponsors() {
+  const q    = query(collection(db, 'sponsors'), orderBy('order', 'asc'));
+  const snap = await getDocs(q);
+  renderSponsorList(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+}
+
+function renderSponsorList(sponsors) {
+  if (!sponsors.length) {
+    sponsorList.innerHTML = `<div class="empty-state"><p>No sponsors yet. Click "+ Add Sponsor" to get started.</p></div>`;
+    return;
+  }
+  sponsorList.innerHTML = sponsors.map(s => `
+    <div class="slot-row" data-id="${escHtml(s.id)}">
+      <div style="width:48px;height:48px;flex-shrink:0;background:#111;border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        ${s.logoUrl ? `<img src="${escHtml(s.logoUrl)}" style="max-width:100%;max-height:100%;object-fit:contain;" alt="" />` : '<span style="font-size:0.6rem;color:#666;text-align:center;padding:2px;">No logo</span>'}
+      </div>
+      <div class="slot-time" style="flex:1;">
+        <span style="display:block;color:var(--white);font-weight:600;">${escHtml(s.name)}</span>
+        ${s.website ? `<span style="font-size:0.78rem;color:var(--muted);">${escHtml(s.website)}</span>` : ''}
+      </div>
+      <div class="slot-loc">Order: ${s.order ?? '—'}</div>
+      <div class="slot-actions">
+        <button class="btn-icon edit-sponsor" data-id="${escHtml(s.id)}" title="Edit">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        </button>
+        <button class="btn-icon danger delete-sponsor" data-id="${escHtml(s.id)}" title="Delete">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+        </button>
+      </div>
+    </div>`).join('');
+
+  sponsorList.querySelectorAll('.edit-sponsor').forEach(btn =>
+    btn.addEventListener('click', () => openSponsorModal(btn.dataset.id)));
+  sponsorList.querySelectorAll('.delete-sponsor').forEach(btn =>
+    btn.addEventListener('click', () => deleteSponsor(btn.dataset.id)));
+}
+
+document.getElementById('addSponsorBtn').addEventListener('click', () => openSponsorModal(null));
+document.getElementById('sponsorModalClose').addEventListener('click', closeSponsorModal);
+document.getElementById('sponsorCancelBtn').addEventListener('click', closeSponsorModal);
+
+async function openSponsorModal(id) {
+  document.getElementById('sponsorModalTitle').textContent = id ? 'Edit Sponsor' : 'Add Sponsor';
+  document.getElementById('sponsorDocId').value = id || '';
+  sponsorLogoPreview.style.display = 'none';
+
+  if (id) {
+    const snap = await getDoc(doc(db, 'sponsors', id));
+    if (snap.exists()) {
+      const s = snap.data();
+      document.getElementById('sponsorName').value    = s.name    || '';
+      document.getElementById('sponsorLogoUrl').value = s.logoUrl || '';
+      document.getElementById('sponsorWebsite').value = s.website || '';
+      document.getElementById('sponsorOrder').value   = s.order   ?? 1;
+      if (s.logoUrl) { sponsorLogoPreview.src = s.logoUrl; sponsorLogoPreview.style.display = 'block'; }
+    }
+  } else {
+    sponsorForm.reset();
+    document.getElementById('sponsorOrder').value = (document.querySelectorAll('#sponsorList .slot-row').length + 1);
+  }
+  sponsorModal.style.display = 'flex';
+}
+function closeSponsorModal() { sponsorModal.style.display = 'none'; }
+
+sponsorForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const saveBtn = document.getElementById('sponsorSaveBtn');
+  saveBtn.textContent = 'Saving…';
+  saveBtn.disabled = true;
+  try {
+    const id   = document.getElementById('sponsorDocId').value;
+    const data = {
+      name:    document.getElementById('sponsorName').value.trim(),
+      logoUrl: document.getElementById('sponsorLogoUrl').value.trim() || null,
+      website: document.getElementById('sponsorWebsite').value.trim() || null,
+      order:   parseInt(document.getElementById('sponsorOrder').value) || 1,
+    };
+    if (id) await updateDoc(doc(db, 'sponsors', id), data);
+    else    await addDoc(collection(db, 'sponsors'), data);
+    closeSponsorModal();
+    await loadSponsors();
+    toast('Sponsor saved!');
+  } catch (err) {
+    toast('Error saving sponsor: ' + err.message, 'error');
+  } finally {
+    saveBtn.textContent = 'Save Sponsor';
+    saveBtn.disabled = false;
+  }
+});
+
+async function deleteSponsor(id) {
+  if (!confirm('Remove this sponsor?')) return;
+  await deleteDoc(doc(db, 'sponsors', id));
+  await loadSponsors();
+  toast('Sponsor removed.');
+}
+
+/* ============================================================
    CLOSE MODALS ON OVERLAY CLICK
    ============================================================ */
-[slotModal, newsModal, compModal, flyerModal].forEach(overlay => {
+[slotModal, newsModal, compModal, sponsorModal, flyerModal].forEach(overlay => {
   overlay.addEventListener('click', e => {
     if (e.target === overlay) overlay.style.display = 'none';
   });
