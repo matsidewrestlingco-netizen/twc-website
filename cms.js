@@ -16,7 +16,7 @@ if (!FIREBASE_ENABLED) {
 async function loadFirebaseContent() {
   try {
     const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-    const { getFirestore, doc, collection, getDocs, getDoc, query, where, orderBy } =
+    const { getFirestore, doc, collection, getDocs, getDoc, query, orderBy } =
       await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
 
     const app = initializeApp(firebaseConfig);
@@ -24,9 +24,9 @@ async function loadFirebaseContent() {
 
     await Promise.all([
       loadSchedule(db, { doc, getDoc }),
-      loadNews(db, { collection, query, getDocs, where, orderBy }),
-      loadFlyers(db, { collection, query, getDocs, where, orderBy }),
-      loadCompetitions(db, { collection, query, getDocs, where, orderBy }),
+      loadNews(db, { collection, query, getDocs, orderBy }),
+      loadFlyers(db, { collection, query, getDocs, orderBy }),
+      loadCompetitions(db, { collection, query, getDocs, orderBy }),
     ]);
   } catch (err) {
     console.warn('[TWC CMS] Could not load Firebase content:', err.message);
@@ -60,19 +60,20 @@ async function loadSchedule(db, { doc, getDoc }) {
 }
 
 /* ---- News ---- */
-async function loadNews(db, { collection, query, getDocs, where, orderBy }) {
-  const q    = query(collection(db, 'news'), where('published', '==', true), orderBy('date', 'desc'));
+async function loadNews(db, { collection, query, getDocs, orderBy }) {
+  const q    = query(collection(db, 'news'), orderBy('date', 'desc'));
   const snap = await getDocs(q);
 
   const newsGrid  = document.getElementById('newsGrid');
   const newsEmpty = document.getElementById('newsEmpty');
   if (!newsGrid) return;
 
-  if (snap.empty) return; // leave the empty state visible
+  const published = snap.docs.filter(d => d.data().published !== false);
+  if (!published.length) return; // leave the empty state visible
 
   if (newsEmpty) newsEmpty.style.display = 'none';
 
-  newsGrid.innerHTML = snap.docs.map(d => {
+  newsGrid.innerHTML = published.map(d => {
     const p    = d.data();
     const date = p.date?.toDate
       ? p.date.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -90,16 +91,18 @@ async function loadNews(db, { collection, query, getDocs, where, orderBy }) {
 }
 
 /* ---- Flyers ---- */
-async function loadFlyers(db, { collection, query, getDocs, where, orderBy }) {
-  const q    = query(collection(db, 'flyers'), where('published', '==', true), orderBy('date', 'desc'));
+async function loadFlyers(db, { collection, query, getDocs, orderBy }) {
+  const q    = query(collection(db, 'flyers'), orderBy('date', 'desc'));
   const snap = await getDocs(q);
-  if (snap.empty) return;
 
   const flyersWrap = document.getElementById('flyersWrap');
   const flyersGrid = document.getElementById('flyersGrid');
   if (!flyersWrap || !flyersGrid) return;
 
-  flyersGrid.innerHTML = snap.docs.map(d => {
+  const published = snap.docs.filter(d => d.data().published !== false);
+  if (!published.length) return;
+
+  flyersGrid.innerHTML = published.map(d => {
     const p = d.data();
     return `
       <a class="flyer-card" href="${escHtml(p.imageUrl)}" target="_blank" rel="noopener">
@@ -112,15 +115,16 @@ async function loadFlyers(db, { collection, query, getDocs, where, orderBy }) {
 }
 
 /* ---- Competitions ---- */
-async function loadCompetitions(db, { collection, query, getDocs, where, orderBy }) {
-  const q    = query(collection(db, 'competitions'), where('published', '==', true), orderBy('date', 'asc'));
+async function loadCompetitions(db, { collection, query, getDocs, orderBy }) {
+  const q    = query(collection(db, 'competitions'), orderBy('date', 'asc'));
   const snap = await getDocs(q);
 
   const compList  = document.getElementById('compList');
   const compEmpty = document.getElementById('compEmpty');
   if (!compList) return;
 
-  if (snap.empty) return; // leave the empty state visible
+  const allDocs = snap.docs.filter(d => d.data().published !== false);
+  if (!allDocs.length) return; // leave the empty state visible
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -128,7 +132,7 @@ async function loadCompetitions(db, { collection, query, getDocs, where, orderBy
   const upcoming = [];
   const past     = [];
 
-  snap.docs.forEach(d => {
+  allDocs.forEach(d => {
     const data     = d.data();
     const eventDate = new Date(data.date + 'T00:00:00');
     const checkDate = data.endDate ? new Date(data.endDate + 'T00:00:00') : eventDate;
