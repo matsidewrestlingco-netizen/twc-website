@@ -28,6 +28,7 @@ async function loadFirebaseContent() {
       loadFlyers(db, { collection, query, getDocs, orderBy }),
       loadCompetitions(db, { collection, query, getDocs, orderBy }),
       loadSponsors(db, { collection, query, getDocs, orderBy }),
+      loadAffiliations(db, { collection, query, getDocs, orderBy }),
     ]);
   } catch (err) {
     console.warn('[TWC CMS] Could not load Firebase content:', err.message);
@@ -192,6 +193,25 @@ async function loadSponsors(db, { collection, query, getDocs, orderBy }) {
       : `<div class="sponsor-card">${inner}</div>`;
   }).join('') +
   `<div class="sponsor-card sponsor-card--open"><div class="sponsor-open-text">Your Business<br>Here</div></div>`;
+}
+
+/* ---- Affiliations ---- */
+async function loadAffiliations(db, { collection, query, getDocs, orderBy }) {
+  const q    = query(collection(db, 'affiliations'), orderBy('order', 'asc'));
+  const snap = await getDocs(q);
+
+  const grid = document.getElementById('affiliationsGrid');
+  if (!grid || snap.empty) return;
+
+  grid.innerHTML = snap.docs.map(d => {
+    const a = d.data();
+    const inner = a.logoUrl
+      ? `<img src="${escHtml(a.logoUrl)}" alt="${escHtml(a.name)}" style="max-width:100%;max-height:90px;object-fit:contain;" />`
+      : `<div class="sponsor-logo-placeholder">${escHtml(a.name)}</div>`;
+    return a.website
+      ? `<a class="sponsor-card" href="${escHtml(a.website)}" target="_blank" rel="noopener" title="${escHtml(a.name)}">${inner}</a>`
+      : `<div class="sponsor-card">${inner}</div>`;
+  }).join('');
 }
 
 /* ---- Helpers ---- */

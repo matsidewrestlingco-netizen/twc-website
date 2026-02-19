@@ -96,6 +96,7 @@ function initDashboard() {
   loadNews();
   loadCompetitions();
   loadSponsors();
+  loadAffiliations();
   loadFlyers();
 }
 
@@ -687,9 +688,121 @@ async function deleteSponsor(id) {
 }
 
 /* ============================================================
+   AFFILIATIONS
+   ============================================================ */
+const affiliationList  = document.getElementById('affiliationList');
+const affiliationModal = document.getElementById('affiliationModal');
+const affiliationForm  = document.getElementById('affiliationForm');
+
+const affiliationLogoInput   = document.getElementById('affiliationLogoUrl');
+const affiliationLogoPreview = document.getElementById('affiliationLogoPreview');
+affiliationLogoInput.addEventListener('input', () => {
+  const url = affiliationLogoInput.value.trim();
+  affiliationLogoPreview.src          = url;
+  affiliationLogoPreview.style.display = url ? 'block' : 'none';
+});
+
+async function loadAffiliations() {
+  const q    = query(collection(db, 'affiliations'), orderBy('order', 'asc'));
+  const snap = await getDocs(q);
+  renderAffiliationList(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+}
+
+function renderAffiliationList(affiliations) {
+  if (!affiliations.length) {
+    affiliationList.innerHTML = `<div class="empty-state"><p>No affiliations yet. Click "+ Add Affiliation" to get started.</p></div>`;
+    return;
+  }
+  affiliationList.innerHTML = affiliations.map(a => `
+    <div class="slot-row" data-id="${escHtml(a.id)}">
+      <div style="width:48px;height:48px;flex-shrink:0;background:#111;border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        ${a.logoUrl ? `<img src="${escHtml(a.logoUrl)}" style="max-width:100%;max-height:100%;object-fit:contain;" alt="" />` : '<span style="font-size:0.6rem;color:#666;text-align:center;padding:2px;">No logo</span>'}
+      </div>
+      <div class="slot-time" style="flex:1;">
+        <span style="display:block;color:var(--white);font-weight:600;">${escHtml(a.name)}</span>
+        ${a.website ? `<span style="font-size:0.78rem;color:var(--muted);">${escHtml(a.website)}</span>` : ''}
+      </div>
+      <div class="slot-loc">Order: ${a.order ?? '—'}</div>
+      <div class="slot-actions">
+        <button class="btn-icon edit-affiliation" data-id="${escHtml(a.id)}" title="Edit">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        </button>
+        <button class="btn-icon danger delete-affiliation" data-id="${escHtml(a.id)}" title="Delete">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+        </button>
+      </div>
+    </div>`).join('');
+
+  affiliationList.querySelectorAll('.edit-affiliation').forEach(btn =>
+    btn.addEventListener('click', () => openAffiliationModal(btn.dataset.id)));
+  affiliationList.querySelectorAll('.delete-affiliation').forEach(btn =>
+    btn.addEventListener('click', () => deleteAffiliation(btn.dataset.id)));
+}
+
+document.getElementById('addAffiliationBtn').addEventListener('click', () => openAffiliationModal(null));
+document.getElementById('affiliationModalClose').addEventListener('click', closeAffiliationModal);
+document.getElementById('affiliationCancelBtn').addEventListener('click', closeAffiliationModal);
+
+async function openAffiliationModal(id) {
+  document.getElementById('affiliationModalTitle').textContent = id ? 'Edit Affiliation' : 'Add Affiliation';
+  document.getElementById('affiliationDocId').value = id || '';
+  affiliationLogoPreview.style.display = 'none';
+
+  if (id) {
+    const snap = await getDoc(doc(db, 'affiliations', id));
+    if (snap.exists()) {
+      const a = snap.data();
+      document.getElementById('affiliationName').value    = a.name    || '';
+      document.getElementById('affiliationLogoUrl').value = a.logoUrl || '';
+      document.getElementById('affiliationWebsite').value = a.website || '';
+      document.getElementById('affiliationOrder').value   = a.order   ?? 1;
+      if (a.logoUrl) { affiliationLogoPreview.src = a.logoUrl; affiliationLogoPreview.style.display = 'block'; }
+    }
+  } else {
+    affiliationForm.reset();
+    document.getElementById('affiliationOrder').value = (document.querySelectorAll('#affiliationList .slot-row').length + 1);
+  }
+  affiliationModal.style.display = 'flex';
+}
+function closeAffiliationModal() { affiliationModal.style.display = 'none'; }
+
+affiliationForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const saveBtn = document.getElementById('affiliationSaveBtn');
+  saveBtn.textContent = 'Saving…';
+  saveBtn.disabled = true;
+  try {
+    const id   = document.getElementById('affiliationDocId').value;
+    const data = {
+      name:    document.getElementById('affiliationName').value.trim(),
+      logoUrl: document.getElementById('affiliationLogoUrl').value.trim() || null,
+      website: document.getElementById('affiliationWebsite').value.trim() || null,
+      order:   parseInt(document.getElementById('affiliationOrder').value) || 1,
+    };
+    if (id) await updateDoc(doc(db, 'affiliations', id), data);
+    else    await addDoc(collection(db, 'affiliations'), data);
+    closeAffiliationModal();
+    await loadAffiliations();
+    toast('Affiliation saved!');
+  } catch (err) {
+    toast('Error saving affiliation: ' + err.message, 'error');
+  } finally {
+    saveBtn.textContent = 'Save Affiliation';
+    saveBtn.disabled = false;
+  }
+});
+
+async function deleteAffiliation(id) {
+  if (!confirm('Remove this affiliation?')) return;
+  await deleteDoc(doc(db, 'affiliations', id));
+  await loadAffiliations();
+  toast('Affiliation removed.');
+}
+
+/* ============================================================
    CLOSE MODALS ON OVERLAY CLICK
    ============================================================ */
-[slotModal, newsModal, compModal, sponsorModal, flyerModal].forEach(overlay => {
+[slotModal, newsModal, compModal, sponsorModal, affiliationModal, flyerModal].forEach(overlay => {
   overlay.addEventListener('click', e => {
     if (e.target === overlay) overlay.style.display = 'none';
   });

@@ -60,6 +60,10 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
           Sponsors
         </button>
+        <button class="nav-item" data-tab="affiliations">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+          Affiliations
+        </button>
         <button class="nav-item" data-tab="flyers">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
           Flyers
@@ -308,6 +312,53 @@
               <div class="modal-actions">
                 <button type="button" class="btn-ghost" id="sponsorCancelBtn">Cancel</button>
                 <button type="submit" class="btn-primary" id="sponsorSaveBtn">Save Sponsor</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== AFFILIATIONS TAB ===== -->
+      <section class="tab-panel" id="tab-affiliations">
+        <div class="panel-header">
+          <h2>Affiliations</h2>
+          <button class="btn-primary btn-sm" id="addAffiliationBtn">+ Add Affiliation</button>
+        </div>
+        <p class="panel-desc">Organizations and programs displayed in the Affiliations section. Supports up to 2 entries.</p>
+        <div class="schedule-list" id="affiliationList">
+          <div class="loading-state">Loading affiliations&hellip;</div>
+        </div>
+
+        <!-- Affiliation modal -->
+        <div class="modal-overlay" id="affiliationModal" style="display:none;">
+          <div class="modal">
+            <div class="modal-header">
+              <h3 id="affiliationModalTitle">Add Affiliation</h3>
+              <button class="modal-close" id="affiliationModalClose">&times;</button>
+            </div>
+            <form id="affiliationForm">
+              <input type="hidden" id="affiliationDocId" />
+              <div class="field">
+                <label for="affiliationName">Organization Name</label>
+                <input type="text" id="affiliationName" placeholder="e.g. USA Wrestling" required />
+              </div>
+              <div class="field">
+                <label for="affiliationLogoUrl">Logo URL (optional)</label>
+                <input type="url" id="affiliationLogoUrl" placeholder="https://i.imgur.com/example.png" />
+                <small class="field-hint">Upload logo to <a href="https://imgur.com/upload" target="_blank" rel="noopener">Imgur</a> and paste the direct image link. Leave blank to show the name as text.</small>
+                <img id="affiliationLogoPreview" class="url-preview" style="display:none;" alt="Logo preview" />
+              </div>
+              <div class="field">
+                <label for="affiliationWebsite">Website URL (optional)</label>
+                <input type="url" id="affiliationWebsite" placeholder="https://www.example.com" />
+              </div>
+              <div class="field">
+                <label for="affiliationOrder">Display Order</label>
+                <input type="number" id="affiliationOrder" value="1" min="1" max="2" />
+              </div>
+              <div class="modal-actions">
+                <button type="button" class="btn-ghost" id="affiliationCancelBtn">Cancel</button>
+                <button type="submit" class="btn-primary" id="affiliationSaveBtn">Save Affiliation</button>
               </div>
             </form>
           </div>
