@@ -49,7 +49,7 @@ if (signupForm) {
   signupForm.addEventListener('submit', (e) => {
     e.preventDefault();
     // In production: send to your form handler / email service
-    showToast('Registration submitted! We\'ll be in touch within 24–48 hours.');
+    showToast('Inquiry submitted! We\'ll be in touch within 24–48 hours.');
     signupForm.reset();
   });
 }
