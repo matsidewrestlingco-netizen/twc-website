@@ -148,6 +148,8 @@ input, textarea, select, button { font-family: inherit; }
   text-transform: uppercase;
 }
 .logo-tiger   { font-size: 1.4rem; color: var(--gold); }
+.logo-tigerW   { font-size: 1.4rem; color: var(--white); }
+.logo-tigerM   { font-size: 1.4rem; color: var(--muted); }
 .logo-wrestling { font-size: 1rem; color: var(--white); }
 .logo-club    { font-size: 0.8rem; color: var(--muted); }
 
@@ -806,6 +808,122 @@ textarea { resize: vertical; }
 .news-date { font-family: var(--font-sub); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 8px; }
 .news-title { font-family: var(--font-sub); font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 10px; }
 .news-content { font-size: 0.88rem; color: var(--muted); line-height: 1.65; white-space: pre-line; }
+
+.news-empty {
+  grid-column: 1 / -1;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* ============================================================
+   COMPETITIONS
+   ============================================================ */
+.competitions { background: var(--black); }
+
+.comp-list { display: flex; flex-direction: column; gap: 16px; }
+
+.comp-card {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  transition: border-color var(--transition), transform var(--transition);
+}
+.comp-card:hover { border-color: var(--gold); transform: translateX(4px); }
+.comp-card--past { opacity: 0.5; }
+.comp-card--past:hover { opacity: 0.7; transform: none; border-color: var(--border); }
+
+.comp-date-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  background: rgba(240,180,41,0.08);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 8px;
+  flex-shrink: 0;
+  text-align: center;
+}
+.comp-month { font-family: var(--font-sub); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; color: var(--gold); }
+.comp-day   { font-family: var(--font-head); font-size: 1.8rem; color: var(--white); line-height: 1.1; }
+
+.comp-body { flex: 1; min-width: 0; }
+.comp-top  { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.comp-name { font-family: var(--font-sub); font-size: 1.15rem; font-weight: 700; color: var(--white); }
+
+.comp-badge { font-family: var(--font-sub); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+.comp-badge--upcoming { color: var(--gold); background: rgba(240,180,41,0.1); border: 1px solid rgba(240,180,41,0.25); }
+.comp-badge--past     { color: var(--muted); background: rgba(154,154,149,0.1); border: 1px solid rgba(154,154,149,0.2); }
+
+.comp-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.comp-meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.comp-meta svg { flex-shrink: 0; color: var(--gold); }
+
+.comp-notes { font-size: 0.88rem; color: var(--muted); line-height: 1.65; margin-bottom: 10px; }
+.comp-link {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-sub);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold);
+  transition: opacity var(--transition);
+}
+.comp-link:hover { opacity: 0.75; }
+
+.comp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 64px 24px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+}
+.comp-empty svg { opacity: 0.3; }
+.comp-empty p { font-size: 0.95rem; }
+
+.comp-past-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 8px 0;
+  color: var(--muted);
+  font-family: var(--font-sub);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.comp-past-divider::before,
+.comp-past-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-dim, rgba(255,255,255,0.07)); }
 
 .flyers-heading { font-family: var(--font-sub); font-size: 1rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white); margin-bottom: 20px; }
 .flyers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }

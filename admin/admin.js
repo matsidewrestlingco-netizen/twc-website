@@ -94,6 +94,7 @@ function initDashboard() {
 
   loadSchedule();
   loadNews();
+  loadCompetitions();
   loadFlyers();
 }
 
@@ -441,9 +442,134 @@ async function deleteFlyer(id) {
 }
 
 /* ============================================================
+   COMPETITIONS
+   ============================================================ */
+const compListEl = document.getElementById('compList');
+const compModal  = document.getElementById('compModal');
+const compForm   = document.getElementById('compForm');
+
+async function loadCompetitions() {
+  const q    = query(collection(db, 'competitions'), orderBy('date', 'asc'));
+  const snap = await getDocs(q);
+  renderCompList(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+}
+
+function renderCompList(events) {
+  if (!events.length) {
+    compListEl.innerHTML = `<div class="empty-state"><p>No events yet. Click "+ Add Event" to get started.</p></div>`;
+    return;
+  }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  compListEl.innerHTML = events.map(ev => {
+    const eventDate = new Date(ev.date + 'T00:00:00');
+    const checkDate = ev.endDate ? new Date(ev.endDate + 'T00:00:00') : eventDate;
+    const isPast    = checkDate < today;
+    const dateStr   = ev.endDate && ev.endDate !== ev.date
+      ? `${fmtDateShort(ev.date)} – ${fmtDateShort(ev.endDate)}`
+      : fmtDateShort(ev.date);
+    return `
+      <div class="slot-row" data-id="${escHtml(ev.id)}" style="${isPast ? 'opacity:0.55' : ''}">
+        <div class="slot-day" style="width:auto;min-width:90px;">${dateStr}</div>
+        <div class="slot-time" style="flex:1.5;">${escHtml(ev.name)}</div>
+        <div class="slot-loc">${escHtml(ev.location || '—')}</div>
+        <span class="news-row-status ${isPast ? 'status-draft' : 'status-published'}" style="flex-shrink:0;">${isPast ? 'Past' : 'Upcoming'}</span>
+        <div class="slot-actions">
+          <button class="btn-icon edit-comp" data-id="${escHtml(ev.id)}" title="Edit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          </button>
+          <button class="btn-icon danger delete-comp" data-id="${escHtml(ev.id)}" title="Delete">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+
+  compListEl.querySelectorAll('.edit-comp').forEach(btn =>
+    btn.addEventListener('click', () => openCompModal(btn.dataset.id)));
+  compListEl.querySelectorAll('.delete-comp').forEach(btn =>
+    btn.addEventListener('click', () => deleteComp(btn.dataset.id)));
+}
+
+document.getElementById('addCompBtn').addEventListener('click', () => openCompModal(null));
+document.getElementById('compModalClose').addEventListener('click', closeCompModal);
+document.getElementById('compCancelBtn').addEventListener('click', closeCompModal);
+
+async function openCompModal(id) {
+  document.getElementById('compModalTitle').textContent = id ? 'Edit Event' : 'Add Competition';
+  document.getElementById('compDocId').value = id || '';
+
+  if (id) {
+    const snap = await getDoc(doc(db, 'competitions', id));
+    if (snap.exists()) {
+      const ev = snap.data();
+      document.getElementById('compName').value          = ev.name        || '';
+      document.getElementById('compDate').value          = ev.date        || '';
+      document.getElementById('compEndDate').value       = ev.endDate     || '';
+      document.getElementById('compLocation').value      = ev.location    || '';
+      document.getElementById('compDivisions').value     = ev.divisions   || '';
+      document.getElementById('compNotes').value         = ev.notes       || '';
+      document.getElementById('compLink').value          = ev.link        || '';
+      document.getElementById('compPublished').checked   = ev.published   ?? true;
+    }
+  } else {
+    compForm.reset();
+    document.getElementById('compPublished').checked = true;
+  }
+  compModal.style.display = 'flex';
+}
+function closeCompModal() { compModal.style.display = 'none'; }
+
+compForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const saveBtn = document.getElementById('compSaveBtn');
+  saveBtn.textContent = 'Saving…';
+  saveBtn.disabled = true;
+
+  try {
+    const id = document.getElementById('compDocId').value;
+    const data = {
+      name:      document.getElementById('compName').value.trim(),
+      date:      document.getElementById('compDate').value,
+      endDate:   document.getElementById('compEndDate').value || null,
+      location:  document.getElementById('compLocation').value.trim(),
+      divisions: document.getElementById('compDivisions').value.trim(),
+      notes:     document.getElementById('compNotes').value.trim(),
+      link:      document.getElementById('compLink').value.trim() || null,
+      published: document.getElementById('compPublished').checked,
+    };
+
+    if (id) await updateDoc(doc(db, 'competitions', id), data);
+    else    await addDoc(collection(db, 'competitions'), data);
+
+    closeCompModal();
+    await loadCompetitions();
+    toast('Event saved!');
+  } catch (err) {
+    toast('Error saving event: ' + err.message, 'error');
+  } finally {
+    saveBtn.textContent = 'Save Event';
+    saveBtn.disabled = false;
+  }
+});
+
+async function deleteComp(id) {
+  if (!confirm('Delete this event? This cannot be undone.')) return;
+  await deleteDoc(doc(db, 'competitions', id));
+  await loadCompetitions();
+  toast('Event deleted.');
+}
+
+function fmtDateShort(dateStr) {
+  if (!dateStr) return '';
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+/* ============================================================
    CLOSE MODALS ON OVERLAY CLICK
    ============================================================ */
-[slotModal, newsModal, flyerModal].forEach(overlay => {
+[slotModal, newsModal, compModal, flyerModal].forEach(overlay => {
   overlay.addEventListener('click', e => {
     if (e.target === overlay) overlay.style.display = 'none';
   });

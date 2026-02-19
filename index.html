@@ -23,7 +23,8 @@
       </button>
       <nav class="nav-links" id="navLinks">
         <a href="#about">About</a>
-        <a href="#news" id="navNewsLink" style="display:none;">News</a>
+        <a href="#news">News</a>
+        <a href="#competitions">Competitions</a>
         <a href="#schedule">Schedule</a>
         <a href="#signup">Sign Up</a>
         <a href="#sponsors">Sponsors</a>
@@ -128,16 +129,33 @@
   </section>
 
   <!-- ===== NEWS ===== -->
-  <section class="section news" id="news" style="display:none;">
+  <section class="section news" id="news">
     <div class="container">
       <div class="section-label">Latest Updates</div>
       <h2 class="section-title">News &amp; Announcements</h2>
       <div class="news-grid" id="newsGrid">
-        <!-- Populated dynamically by Firebase -->
+        <div class="news-empty" id="newsEmpty">
+          <p>No announcements yet. Check back soon or follow us on social media for the latest updates.</p>
+        </div>
       </div>
       <div class="flyers-wrap" id="flyersWrap" style="display:none;">
         <h3 class="flyers-heading">Flyers &amp; Downloads</h3>
         <div class="flyers-grid" id="flyersGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COMPETITIONS ===== -->
+  <section class="section competitions" id="competitions">
+    <div class="container">
+      <div class="section-label">Get Competitive</div>
+      <h2 class="section-title">Competition Schedule</h2>
+      <p class="section-sub">Upcoming tournaments and events. All competitors must have an active USA Wrestling membership.</p>
+      <div class="comp-list" id="compList">
+        <div class="comp-empty" id="compEmpty">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path></svg>
+          <p>No competitions scheduled yet. Check back soon!</p>
+        </div>
       </div>
     </div>
   </section>

@@ -52,6 +52,10 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
           News
         </button>
+        <button class="nav-item" data-tab="competitions">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path></svg>
+          Competitions
+        </button>
         <button class="nav-item" data-tab="flyers">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
           Flyers
@@ -178,6 +182,71 @@
               <div class="modal-actions">
                 <button type="button" class="btn-ghost" id="newsCancelBtn">Cancel</button>
                 <button type="submit" class="btn-primary" id="newsSaveBtn">Save Post</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== COMPETITIONS TAB ===== -->
+      <section class="tab-panel" id="tab-competitions">
+        <div class="panel-header">
+          <h2>Competition Schedule</h2>
+          <button class="btn-primary btn-sm" id="addCompBtn">+ Add Event</button>
+        </div>
+        <p class="panel-desc">Add upcoming tournaments and competitions. Past events are automatically marked and sorted to the bottom.</p>
+        <div class="schedule-list" id="compList">
+          <div class="loading-state">Loading competitions&hellip;</div>
+        </div>
+
+        <!-- Competition modal -->
+        <div class="modal-overlay" id="compModal" style="display:none;">
+          <div class="modal modal--wide">
+            <div class="modal-header">
+              <h3 id="compModalTitle">Add Competition</h3>
+              <button class="modal-close" id="compModalClose">&times;</button>
+            </div>
+            <form id="compForm">
+              <input type="hidden" id="compDocId" />
+              <div class="field">
+                <label for="compName">Event Name</label>
+                <input type="text" id="compName" placeholder="e.g. USAW Western PA Regional" required />
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="compDate">Date</label>
+                  <input type="date" id="compDate" required />
+                </div>
+                <div class="field">
+                  <label for="compEndDate">End Date (optional)</label>
+                  <input type="date" id="compEndDate" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="compLocation">Location</label>
+                <input type="text" id="compLocation" placeholder="e.g. Pittsburgh, PA" />
+              </div>
+              <div class="field">
+                <label for="compDivisions">Divisions / Age Groups</label>
+                <input type="text" id="compDivisions" placeholder="e.g. 8U, 10U, 12U, 14U, 16U" />
+              </div>
+              <div class="field">
+                <label for="compNotes">Notes (optional)</label>
+                <textarea id="compNotes" rows="3" placeholder="Registration info, deadlines, links, etc."></textarea>
+              </div>
+              <div class="field">
+                <label for="compLink">Registration Link (optional)</label>
+                <input type="url" id="compLink" placeholder="https://trackwrestling.com/..." />
+              </div>
+              <div class="field checkbox-field">
+                <label>
+                  <input type="checkbox" id="compPublished" checked />
+                  Show on website
+                </label>
+              </div>
+              <div class="modal-actions">
+                <button type="button" class="btn-ghost" id="compCancelBtn">Cancel</button>
+                <button type="submit" class="btn-primary" id="compSaveBtn">Save Event</button>
               </div>
             </form>
           </div>
