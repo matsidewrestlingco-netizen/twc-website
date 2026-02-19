@@ -151,7 +151,10 @@ function renderSchedule() {
   scheduleList.innerHTML = sorted.map(slot => `
     <div class="slot-row" data-id="${escHtml(slot.id)}">
       <div class="slot-day">${escHtml(slot.day)}</div>
-      <div class="slot-time">${escHtml(fmtTime(slot.startTime))} – ${escHtml(fmtTime(slot.endTime))}</div>
+      <div class="slot-time" style="flex:1.5;">
+        ${slot.title ? `<span style="display:block;color:var(--white);font-weight:600;">${escHtml(slot.title)}</span>` : ''}
+        ${escHtml(fmtTime(slot.startTime))} – ${escHtml(fmtTime(slot.endTime))}
+      </div>
       <div class="slot-loc">${escHtml(slot.location)}</div>
       ${slot.featured ? '<div class="slot-badge">Featured</div>' : ''}
       <div class="slot-actions">
@@ -178,6 +181,7 @@ function openSlotModal(id) {
   const slot = id ? scheduleSlots.find(s => s.id === id) : null;
   document.getElementById('slotModalTitle').textContent = slot ? 'Edit Practice' : 'Add Practice';
   document.getElementById('slotId').value        = slot?.id || '';
+  document.getElementById('slotTitle').value      = slot?.title || '';
   document.getElementById('slotDay').value        = slot?.day || 'Tuesday';
   document.getElementById('slotStart').value      = slot?.startTime || '20:00';
   document.getElementById('slotEnd').value        = slot?.endTime || '21:00';
@@ -193,6 +197,7 @@ slotForm.addEventListener('submit', async e => {
   const id      = document.getElementById('slotId').value || crypto.randomUUID();
   const updated = {
     id,
+    title:     document.getElementById('slotTitle').value.trim(),
     day:       document.getElementById('slotDay').value,
     startTime: document.getElementById('slotStart').value,
     endTime:   document.getElementById('slotEnd').value,

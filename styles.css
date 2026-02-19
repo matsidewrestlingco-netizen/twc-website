@@ -452,6 +452,15 @@ input, textarea, select, button { font-family: inherit; }
   letter-spacing: 0.04em;
   margin-bottom: 8px;
 }
+.schedule-title {
+  font-family: var(--font-sub);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 6px;
+}
 .schedule-time {
   font-family: var(--font-sub);
   font-size: 1.4rem;

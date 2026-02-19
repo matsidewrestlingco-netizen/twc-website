@@ -52,6 +52,7 @@ async function loadSchedule(db, { doc, getDoc }) {
       <div class="schedule-card${featured ? ' schedule-card--featured' : ''}">
         ${featured ? '<div class="schedule-featured-tag">Featured</div>' : ''}
         <div class="schedule-day">${escHtml(slot.day)}</div>
+        ${slot.title ? `<div class="schedule-title">${escHtml(slot.title)}</div>` : ''}
         <div class="schedule-time">${escHtml(fmtTime(slot.startTime))} – ${escHtml(fmtTime(slot.endTime))}</div>
         <div class="schedule-loc">${escHtml(slot.location)}</div>
         <div class="schedule-badge">Weekly</div>
