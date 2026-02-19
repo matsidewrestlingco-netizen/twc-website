@@ -517,6 +517,7 @@ async function openCompModal(id) {
       document.getElementById('compDivisions').value     = ev.divisions   || '';
       document.getElementById('compNotes').value         = ev.notes       || '';
       document.getElementById('compLink').value          = ev.link        || '';
+      document.getElementById('compTravel').checked      = ev.travel      ?? false;
       document.getElementById('compPublished').checked   = ev.published   ?? true;
     }
   } else {
@@ -543,6 +544,7 @@ compForm.addEventListener('submit', async e => {
       divisions: document.getElementById('compDivisions').value.trim(),
       notes:     document.getElementById('compNotes').value.trim(),
       link:      document.getElementById('compLink').value.trim() || null,
+      travel:    document.getElementById('compTravel').checked,
       published: document.getElementById('compPublished').checked,
     };
 

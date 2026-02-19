@@ -147,7 +147,8 @@ async function loadCompetitions(db, { collection, query, getDocs, orderBy }) {
   const renderCard = (comp, isPast) => {
     const dateStr = formatCompDate(comp.date, comp.endDate);
     return `
-      <div class="comp-card${isPast ? ' comp-card--past' : ''}">
+      <div class="comp-card${isPast ? ' comp-card--past' : ''}${comp.travel ? ' comp-card--travel' : ''}">
+        ${comp.travel && !isPast ? '<div class="comp-travel-tag">&#9992; Travel Event</div>' : ''}
         <div class="comp-date-block">
           <span class="comp-month">${fmtMonth(comp.date)}</span>
           <span class="comp-day">${fmtDay(comp.date)}</span>
