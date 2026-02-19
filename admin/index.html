@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TWC Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-logo">
+        <span class="logo-tiger">TIGER</span>
+        <span class="logo-club">WRESTLING CLUB</span>
+      </div>
+      <h1 class="login-title">Admin Panel</h1>
+      <p class="login-sub">Sign in to manage content</p>
+      <div id="loginError" class="login-error" style="display:none;"></div>
+      <form id="loginForm">
+        <div class="field">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" placeholder="admin@example.com" required />
+        </div>
+        <div class="field">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-primary" id="loginBtn">Sign In</button>
+      </form>
+      <a href="../index.html" class="back-link">&larr; Back to website</a>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN DASHBOARD ===== -->
+  <div class="dashboard" id="dashboard" style="display:none;">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-tiger">TWC</span>
+        <span class="logo-club">Admin</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="schedule">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          Schedule
+        </button>
+        <button class="nav-item" data-tab="news">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          News
+        </button>
+        <button class="nav-item" data-tab="flyers">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          Flyers
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="../index.html" class="view-site-link" target="_blank">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          View Site
+        </a>
+        <button class="sign-out-btn" id="signOutBtn">Sign Out</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+
+      <!-- ===== SCHEDULE TAB ===== -->
+      <section class="tab-panel active" id="tab-schedule">
+        <div class="panel-header">
+          <h2>Practice Schedule</h2>
+          <button class="btn-primary btn-sm" id="addSlotBtn">+ Add Practice</button>
+        </div>
+        <p class="panel-desc">Manage practice days and times. Changes go live immediately.</p>
+        <div class="schedule-list" id="scheduleList">
+          <div class="loading-state">Loading schedule&hellip;</div>
+        </div>
+
+        <!-- Slot edit modal -->
+        <div class="modal-overlay" id="slotModal" style="display:none;">
+          <div class="modal">
+            <div class="modal-header">
+              <h3 id="slotModalTitle">Add Practice</h3>
+              <button class="modal-close" id="slotModalClose">&times;</button>
+            </div>
+            <form id="slotForm">
+              <input type="hidden" id="slotId" />
+              <div class="field-row">
+                <div class="field">
+                  <label for="slotDay">Day</label>
+                  <select id="slotDay">
+                    <option>Monday</option>
+                    <option>Tuesday</option>
+                    <option>Wednesday</option>
+                    <option>Thursday</option>
+                    <option>Friday</option>
+                    <option>Saturday</option>
+                    <option selected>Sunday</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="slotOrder">Display Order</label>
+                  <input type="number" id="slotOrder" value="1" min="1" max="10" />
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="slotStart">Start Time</label>
+                  <input type="time" id="slotStart" value="20:00" />
+                </div>
+                <div class="field">
+                  <label for="slotEnd">End Time</label>
+                  <input type="time" id="slotEnd" value="21:00" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="slotLocation">Location</label>
+                <input type="text" id="slotLocation" value="NA Senior High School" />
+              </div>
+              <div class="field checkbox-field">
+                <label>
+                  <input type="checkbox" id="slotFeatured" />
+                  Mark as "Featured" (highlighted card)
+                </label>
+              </div>
+              <div class="modal-actions">
+                <button type="button" class="btn-ghost" id="slotCancelBtn">Cancel</button>
+                <button type="submit" class="btn-primary" id="slotSaveBtn">Save Practice</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== NEWS TAB ===== -->
+      <section class="tab-panel" id="tab-news">
+        <div class="panel-header">
+          <h2>News &amp; Announcements</h2>
+          <button class="btn-primary btn-sm" id="addNewsBtn">+ New Post</button>
+        </div>
+        <p class="panel-desc">Posts appear in the News section of the website when published.</p>
+        <div class="news-list" id="newsList">
+          <div class="loading-state">Loading posts&hellip;</div>
+        </div>
+
+        <!-- News edit modal -->
+        <div class="modal-overlay" id="newsModal" style="display:none;">
+          <div class="modal modal--wide">
+            <div class="modal-header">
+              <h3 id="newsModalTitle">New Post</h3>
+              <button class="modal-close" id="newsModalClose">&times;</button>
+            </div>
+            <form id="newsForm">
+              <input type="hidden" id="newsDocId" />
+              <div class="field">
+                <label for="newsTitle">Title</label>
+                <input type="text" id="newsTitle" placeholder="Post title" required />
+              </div>
+              <div class="field">
+                <label for="newsContent">Content</label>
+                <textarea id="newsContent" rows="6" placeholder="Write your announcement here..."></textarea>
+              </div>
+              <div class="field">
+                <label for="newsImageUrl">Image URL (optional)</label>
+                <input type="url" id="newsImageUrl" placeholder="https://i.imgur.com/example.jpg" />
+                <small class="field-hint">Upload your image to <a href="https://imgur.com/upload" target="_blank" rel="noopener">Imgur</a> or Google Drive, then paste the direct link here.</small>
+                <img id="newsImagePreview" class="url-preview" style="display:none;" alt="Preview" />
+              </div>
+              <div class="field checkbox-field">
+                <label>
+                  <input type="checkbox" id="newsPublished" checked />
+                  Publish immediately
+                </label>
+              </div>
+              <div class="modal-actions">
+                <button type="button" class="btn-ghost" id="newsCancelBtn">Cancel</button>
+                <button type="submit" class="btn-primary" id="newsSaveBtn">Save Post</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== FLYERS TAB ===== -->
+      <section class="tab-panel" id="tab-flyers">
+        <div class="panel-header">
+          <h2>Flyers &amp; Downloads</h2>
+          <button class="btn-primary btn-sm" id="addFlyerBtn">+ Add Flyer</button>
+        </div>
+        <p class="panel-desc">Add tournament flyers and event posters by pasting an image URL (e.g. from Imgur or Google Drive).</p>
+        <div class="flyer-admin-grid" id="flyerAdminGrid">
+          <div class="loading-state">Loading flyers&hellip;</div>
+        </div>
+
+        <!-- Flyer upload modal -->
+        <div class="modal-overlay" id="flyerModal" style="display:none;">
+          <div class="modal">
+            <div class="modal-header">
+              <h3>Upload Flyer</h3>
+              <button class="modal-close" id="flyerModalClose">&times;</button>
+            </div>
+            <form id="flyerForm">
+              <input type="hidden" id="flyerDocId" />
+              <div class="field">
+                <label for="flyerTitle">Title</label>
+                <input type="text" id="flyerTitle" placeholder="e.g. State Tournament 2025" required />
+              </div>
+              <div class="field">
+                <label for="flyerDescription">Description (optional)</label>
+                <input type="text" id="flyerDescription" placeholder="Short description" />
+              </div>
+              <div class="field">
+                <label for="flyerImageUrl">Image URL</label>
+                <input type="url" id="flyerImageUrl" placeholder="https://i.imgur.com/example.jpg" required />
+                <small class="field-hint">Upload your flyer to <a href="https://imgur.com/upload" target="_blank" rel="noopener">Imgur</a> or Google Drive, then paste the direct image link here.</small>
+                <img id="flyerImagePreview" class="url-preview" style="display:none;" alt="Preview" />
+              </div>
+              <div class="field checkbox-field">
+                <label>
+                  <input type="checkbox" id="flyerPublished" checked />
+                  Show on website
+                </label>
+              </div>
+              <div class="modal-actions">
+                <button type="button" class="btn-ghost" id="flyerCancelBtn">Cancel</button>
+                <button type="submit" class="btn-primary" id="flyerSaveBtn">Add Flyer</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TOAST ===== -->
+      <div class="admin-toast" id="adminToast"></div>
+
+    </main>
+  </div>
+
+  <!-- Firebase not configured notice -->
+  <div class="config-notice" id="configNotice" style="display:none;">
+    <div class="config-notice-inner">
+      <h2>Firebase Not Configured</h2>
+      <p>Open <code>firebase-config.js</code> in your project root, fill in your Firebase credentials, and set <code>FIREBASE_ENABLED = true</code>.</p>
+      <p>See the comments in that file for step-by-step setup instructions.</p>
+      <a href="../index.html" class="btn-primary">Back to Site</a>
+    </div>
+  </div>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
